@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>The Prospector — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <script src="js/ruleseed.js"></script>
+
+    <script>
+        const DEFAULT_SIGILS = [
+            "Mighty Leap",
+            "Many Lives",
+            "Touch of Death",
+            "Stinky",
+            "Sprinter",
+        ];
+
+        const RULE_SEEDED_SIGILS = [
+            "Airborne",
+            "Amorphous",
+            "Ant Spawner",
+            "Bees Within",
+            "Bellist",
+            "Bifurcated Strike",
+            "Bone King",
+            "Burrower",
+            "Corpse Eater",
+            "Dam Builder",
+            "Fecundity",
+            "Fledgling",
+            "Guardian",
+            "Hefty",
+            "Hoarder",
+            "Leader",
+            "Loose Tail",
+            "Rabbit Hole",
+            "Sharp Quills",
+            "Trifurcated Strike",
+            "Trinket Bearer",
+            "Unkillable",
+            "Waterborne",
+            "Worthy Sacrifice",
+        ];
+
+        const SIGILS_COUNT_TO_PICK = 11;
+
+        const TABLED_INSECTS = [
+            "Amalgam",
+            "Ant Queen",
+            "Bee",
+            "Beehive",
+            "Cockroach",
+            "Corpse Maggots",
+            "Mantis",
+            "Strange Larva",
+            "Strange Pupa",
+            "Ring Worm",
+            "Stinkbug",
+            "Worker Ant",
+        ];
+
+        function setDefaultRules(rnd) { setRules(rnd); }
+        function setRules(rnd) {
+            const sigils = [...DEFAULT_SIGILS, ...rnd.shuffleArray(RULE_SEEDED_SIGILS)].slice(0, SIGILS_COUNT_TO_PICK);
+            const table = document.getElementById("table");
+            while (table.children.length > 2) table.removeChild(table.lastChild);
+            for (const sigil of sigils) {
+                const row = table.appendChild(document.createElement("tr"));
+                const sigilTd = row.appendChild(document.createElement("td"));
+                sigilTd.classList.add("black-bg");
+                const img = sigilTd.appendChild(document.createElement("img"));
+                img.src = `img/The Prospector/Sigils/${sigil}.png`;
+                img.title = sigil;
+                for (let i = 0; i < 10; i++) {
+                    const td = row.appendChild(document.createElement("td"));
+                    if (rnd.nextDouble() < 0.5) td.innerText = rnd.nextMax(10);
+                    else if (rnd.nextDouble() < 0.1) td.innerText = ["B", "A", "D", "H"][rnd.nextMax(4)];
+                    else {
+                        const char = ["B", "A", "D", "H"][rnd.nextMax(4)];
+                        const operation = ["+", "-", "*"][rnd.nextMax(3)];
+                        const num = operation == "*" ? [3, 7, 9][rnd.nextMax(3)] : rnd.nextMax(9) + 1;
+                        td.innerText = rnd.nextDouble() < 0.5 ? `${char}${operation}${num}` : `${num}${operation}${char}`;
+                    }
+                }
+            }
+            for (const insect of TABLED_INSECTS) {
+                const row = table.appendChild(document.createElement("tr"));
+                const nameTd = row.appendChild(document.createElement("td"));
+                nameTd.innerText = insect;
+                nameTd.classList.add("card-name")
+                for (let i = 0; i < 10; i++) {
+                    const td = row.appendChild(document.createElement("td"));
+                    td.innerText = ["L", "R", "M"][rnd.nextMax(3)];
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .black-bg {
+            background-color: #391c06;
+        }
+
+        p {
+            font-size: 15px;
+        }
+
+        #table img {
+            width: 32px;
+            height: 32px;
+        }
+
+        #table td {
+            text-align: center;
+        }
+
+        #table tr:not(:first-child):not(:nth-child(2)) td:not(:first-child) {
+            width: 32px;
+        }
+
+        .card-name {
+            font-family: 'Heavy Wei', 'Special Elite', 'Courier New', monospace;
+            font-style: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-02">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">The Prospector</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/The Prospector.svg" class="diagram">
+                <h2>On the Subject of The Prospector</h2>
+                <p class="flavour-text">Care for a game of chance? Pick Boulder and I'll break it.<br/>If it's gold... it's yours.</p>
+                <p>The module has three Boulders. There is gold under one of them. Press Boulder to strike it. If there is gold, press it to solve the module.</p>
+                <p>
+                    On top of the module is a cell where the last found insect card is placed. If it is empty, then there are insects under the two Boulders.
+                    If there is no gold under the striked Boulder, then the found insect will move to this cell.
+                </p>
+                <p>
+                    If there is an insect in this cell, then there is a Leaping Trap under one of Boulder.
+                    If you hit this Boulder, the Leaping Trap will kill the insect and give you a strike.
+                    If you strike Boulder under which an insect is located, this new insect will replace the current one.
+                </p>
+                <p>
+                    If you strike Boulder, under which there is no gold, then new Boulders will appear when another module is solved.
+                    If there are no other unsolved modules, then new Boulders will appear immediately, and gold will be located under two of them.
+                    If another module is solved, and none of Boulders are striked,
+                    then The Prospector will hit a random Boulder itself after thirty seconds if you do not do it before him.
+                </p>
+                <p>
+                    Each insect that can be found under Boulders has one additional sigil. It is sewn to the card and has a black background.
+                    Find the row with this sigil in the table below and get the value located in the column with the first digit of the serial number.
+                    If the value contains a letter, then convert it to the number (B - batteries, A - AA-batteries, D - D-batteries, H - battery holders).
+                    Bring the value into the range from zero to nine by adding or subtracting 10.
+                    Using the value as a column, and the name of the card as a row, get under what Boulder is Leaping Trap located
+                    (L - left, R - right, M - middle).
+                </p>
+                <p style="margin-bottom: 0;">Special cards:</p>
+                <ul style="margin-top: 0;">
+                    <li><span class="card-name">Mantis God</span>: Leaping Trap replaced with gold</li>
+                    <li><span class="card-name">Amalgam</span>: Use sigil of this card for next insect</li>
+                    <li>
+                        <span class="card-name">Strange Larva</span>: Gold is removed. The Prospector will not strike Boulders.<br>
+                        If it will not killed, the next insect will be Strange Pupa
+                    </li>
+                    <li>
+                        <span class="card-name">Strange Pupa</span>: Gold is removed. The Prospector will not strike Boulders.<br>
+                        If it will not killed, the next insect will be Mothman
+                    </li>
+                    <li><span class="card-name">Mothman</span>: All Boulders are gold</li>
+                    <li>
+                        <span class="card-name">Worker Ant</span> & <span class="card-name">Ant Queen</span>:
+                        If the previous unkilled insect was Worker Ant or Ant Queen, then insect replaced with gold.
+                    </li>
+                </ul>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 2</div>
+        </div>
+        <div class="page page-bg-02">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">The Prospector</span>
+            </div>
+            <div class="page-content">
+                <table>
+                    <tbody id="table">
+                        <tr>
+                            <td rowspan="2">Sigil /<br>Card name</td>
+                            <td colspan="10">First digit of the serial number / Obtained value</td>
+                        </tr>
+                        <tr>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>2</td>
+                            <td>3</td>
+                            <td>4</td>
+                            <td>5</td>
+                            <td>6</td>
+                            <td>7</td>
+                            <td>8</td>
+                            <td>9</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="page-footer relative-footer">Page 2 of 2</div>
+        </div>
+    </div>
+</body>
+
+</html>
