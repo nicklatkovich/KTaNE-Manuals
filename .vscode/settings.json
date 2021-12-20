@@ -5,5 +5,8 @@
         175
     ],
     "editor.wordWrapColumn": 175,
-    "editor.wordWrap": "wordWrapColumn"
+    "editor.wordWrap": "wordWrapColumn",
+    "[html]": {
+        "editor.wrappingIndent": "indent",
+    },
 }

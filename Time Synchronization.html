@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Time Synchronization — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <style>
+        p {
+            font-size: 15px;
+        }
+
+        table {
+            text-align: center;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-06">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Time Synchronization</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Time Synchronization.svg" class="diagram">
+                <h2>On the Subject of Time Synchronization</h2>
+                <p class="flavour-text">The time was simple. But one German ruined everything.</p>
+                <p>
+                    The module has two clocks with a three-digit seconds counter. The left and right clocks are located on scales with five and six divisions, respectively.
+                    Depending on the division on which the clock is located, the time on it goes differently (from top to bottom):
+                </p>
+                <ul>
+                    <li>Left clock: 144%, 120%, 100%, 83%, 69%</li>
+                    <li>Right clock: 168%, 132%, 110%, 91%, 76%, 63%</li>
+                </ul>
+                <p>
+                    The position of the right clock can be changed using the up and down keys located on the right side of the module.
+                    While the left clock changes its position on its own:
+                    in a random interval between 30 and 90 seconds, the left clock will move to a random direction by one division (without looping).
+                    When this happens, you will hear two short beeps.
+                </p>
+                <p>
+                    When one of the two clocks reaches 1000 seconds, both will reset to 0.
+                    When the time difference between the clocks is more than 30 seconds, then for each increase of this difference by one second, you will hear 4 short beeps.
+                    When the difference reaches 40 seconds, you will receive a strike, and both timers will reset to 0.
+                </p>
+                <p>
+                    There is a display on the top of the module that displays the current percentage of unsolved non-ignored modules.
+                    If this number is less than the number of tens on the left clock, then the module can be solved by pressing this display.
+                    But this display should be pressed only if the difference between the clocks does not exceed 30 seconds,
+                    and the last digit on the left clock is equal to a certain value.
+                    To determine this value, refer to the table below,
+                    use the topmost row in which the condition is met and the column with the color of the display.
+                </p>
+                <table>
+                    <tr>
+                        <td rowspan="2">Condition</td>
+                        <td colspan="7">Display color</td>
+                    </tr>
+                    <tr>
+                        <td>Red</td>
+                        <td>Green</td>
+                        <td>Blue</td>
+                        <td>Cyan</td>
+                        <td>Magenta</td>
+                        <td>Yellow</td>
+                        <td>White</td>
+                    </tr>
+                    <tr>
+                        <td>Bomb started on Monday</td>
+                        <td>8</td>
+                        <td>7</td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>6</td>
+                        <td>4</td>
+                    </tr>
+                    <tr>
+                        <td>Exactly 2 indicators</td>
+                        <td>4</td>
+                        <td>0</td>
+                        <td>9</td>
+                        <td>3</td>
+                        <td>8</td>
+                        <td>5</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <td>Exactly 1 DVI-D port</td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>6</td>
+                        <td>1</td>
+                        <td>7</td>
+                        <td>4</td>
+                        <td>9</td>
+                    </tr>
+                    <tr>
+                        <td>Number of modules is multiple of 3</td>
+                        <td>7</td>
+                        <td>3</td>
+                        <td>1</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>0</td>
+                        <td>8</td>
+                    </tr>
+                    <tr>
+                        <td>Greater than 2 battaries</td>
+                        <td>1</td>
+                        <td>8</td>
+                        <td>4</td>
+                        <td>7</td>
+                        <td>0</td>
+                        <td>3</td>
+                        <td>5</td>
+                    </tr>
+                    <tr>
+                        <td>None of the above apply</td>
+                        <td>6</td>
+                        <td>5</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td>9</td>
+                        <td>7</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 1</div>
+        </div>
+    </div>
+</body>
+
+</html>
