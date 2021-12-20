@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Cellular Swan — Example</title>
+    <script>
+        const STAGES_COUNT = 6;
+
+        function rangeMap(count, map) { return new Array(count).fill(0).map((_, i) => map(i)); }
+
+        function shuffled(arr) {
+            const res = [...arr];
+            for (let i = 0; i < res.length; i++) {
+                const j = Math.floor(Math.random() * res.length);
+                if (i === j) continue;
+                [res[i], res[j]] = [res[j], res[i]];
+            }
+            return res;
+        }
+
+        let automata;
+        let values;
+        let buttons;
+        let logs = [];
+
+        function generate() {
+            automata = [rangeMap(4, () => Math.floor(Math.random() * 2))];
+            for (let i = 0; i < STAGES_COUNT - 1; i++) {
+                automata.push(rangeMap(4, j => {
+                    const c = automata[i][j];
+                    const l = automata[i][(j + 3) % 4];
+                    const r = automata[i][(j + 1) % 4];
+                    return (c + r + c * r + l * c * r) % 2;
+                }));
+            }
+            logs.push("Displays:");
+            for (let i = 0; i < STAGES_COUNT; i++) {
+                logs.push(`Stage #${i + 1}: ${automata[i].map(j => j === 0 ? "-" : "R").join("")}`);
+            }
+            values = rangeMap(4, () => 0);
+            const set = new Set();
+            buttons = [];
+            const solution = [];
+            for (let i = 0; i < STAGES_COUNT; i++) {
+                let possibleIndices = [...automata[i].entries()].filter(([_, c]) => c === 0).map(([i]) => i);
+                if (possibleIndices.length < 2) possibleIndices = [...automata[i].entries()].filter(([_, c]) => c === 1).map(([i]) => i);
+                const possiblePairs = [];
+                for (let j = 0; j < possibleIndices.length; j++) {
+                    for (let k = 0; k < possibleIndices.length; k++) {
+                        if (j === k) continue;
+                        const pair = `${possibleIndices[j]}${possibleIndices[k]}`;
+                        if (set.has(pair)) continue;
+                        possiblePairs.push([possibleIndices[j], possibleIndices[k]]);
+                    }
+                }
+                let pair;
+                if (possiblePairs.length === 0) {
+                    pair = [Math.floor(Math.random() * 4), Math.floor(Math.random() * 3)];
+                    if (pair[1] >= pair[0]) pair[1] += 1;
+                } else pair = possiblePairs[Math.floor(Math.random() * possiblePairs.length)];
+                values[pair[0]] += 2;
+                values[pair[1]] += 1;
+                solution.push(pair);
+                if (!set.has(`${pair[0]}${pair[1]}`)) {
+                    set.add(`${pair[0]}${pair[1]}`);
+                    buttons.push([pair[0], pair[1]]);
+                }
+            }
+            logs.push(`Solution: ${solution.map(([i, j]) => `${i + 1}${j + 1}`).join(", ")}`);
+            while (buttons.length < 12) {
+                const i = Math.floor(Math.random() * 4);
+                let j = Math.floor(Math.random() * 3);
+                if (j >= i) j += 1;
+                buttons.push([i, j]);
+            }
+            buttons = shuffled(buttons);
+            logs = [
+                `Initial displays: ${automata[0].map(j => j === 0 ? "-" : "R").join("")}`,
+                `Initial values: ${values.join(", ")}`,
+                `Buttons: ${buttons.map(([i, j]) => `${i + 1}${j + 1}`).join(", ")}`,
+                ...logs,
+            ];
+            for (const log of logs) console.log(log);
+            for (let i = 0; i < 4; i++) {
+                const td = document.getElementById(`cell-${i + 1}`);
+                if (automata[0][i]) td.classList.add("red");
+                else td.classList.remove("red");
+                td.innerText = values[i];
+            }
+            for (let i = 0; i < 12; i++) {
+                const div = document.getElementById(`button-${i + 1}`);
+                div.innerText = buttons[i].map(j => j + 1).join("");
+            }
+        }
+
+        function checkSolution(solution) {
+            if (solution.length !== STAGES_COUNT) return false;
+            const calc = [...values];
+            for (let i = 0; i < STAGES_COUNT; i++) {
+
+            }
+            return true;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            generate();
+        });
+    </script>
+    <style>
+        body {
+            background-color: #282d36;
+            display: flex;
+            height: 100vh;
+            overflow-y: hidden;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        body > div {
+            border: solid 1px black;
+            background-color: #615248;
+            width: 640px;
+            height: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        table {
+            border-spacing: 16px;
+        }
+
+        td {
+            width: 96px;
+            height: 128px;
+            font-size: 96px;
+            border: solid black 4px;
+            text-align: center;
+            color: black;
+            background-color: white;
+            font-weight: bold;
+            position: relative;
+        }
+
+        td:before {
+            content: " ";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            border-bottom: 2px solid black;
+            width: 100%;
+        }
+
+        td:not(.red):first-child,
+        td:not(.red):nth-child(2) {
+            color: white;
+            background-color: black;
+        }
+
+        td.red {
+            background-color: #f00500;
+            color: black;
+        }
+
+        #buttons-container {
+            margin-top: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+            width: 362px; /* 48*6+2*2*6+4*2*6+2 */
+            background-color: black;
+            padding: 2px;
+            border: solid 2px #333;
+            border-bottom-color: #444;
+            border-top-color: #222;
+        }
+
+        .button {
+            font-size: 24px;
+            width: 48px;
+            height: 48px;
+            margin: 4px;
+            background-color: #111;
+            color: white;
+            border: solid 2px #333;
+            border-top-color: #444;
+            border-bottom-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #exec-button {
+            padding: 0 32px;
+            width: max-content;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <table>
+            <tr>
+                <td id="cell-1"></td>
+                <td id="cell-2"></td>
+                <td id="cell-3"></td>
+                <td id="cell-4"></td>
+            </tr>
+        </table>
+        <div id="buttons-container">
+            <div class="button" id="button-1"></div>
+            <div class="button" id="button-2"></div>
+            <div class="button" id="button-3"></div>
+            <div class="button" id="button-4"></div>
+            <div class="button" id="button-5"></div>
+            <div class="button" id="button-6"></div>
+            <div class="button" id="button-7"></div>
+            <div class="button" id="button-8"></div>
+            <div class="button" id="button-9"></div>
+            <div class="button" id="button-10"></div>
+            <div class="button" id="button-11"></div>
+            <div class="button" id="button-12"></div>
+            <!-- <div class="button" id="exec-button">EXECUTE</div> -->
+        </div>
+    </div>
+</body>
