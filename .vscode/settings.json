@@ -6,6 +6,7 @@
     ],
     "editor.wordWrapColumn": 175,
     "editor.wordWrap": "wordWrapColumn",
+    "html.format.wrapLineLength": 175,
     "[html]": {
         "editor.wrappingIndent": "indent",
     },

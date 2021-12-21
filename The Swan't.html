@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>The Swan't — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <script>
+        const transformations = [
+            [[0, 0, 0, 0], [0, 0, 0, 0]],
+            [[0, 0, 1, 0], [0, 1, 1, 0]],
+            [[0, 1, 1, 0], [1, 1, 1, 0]],
+            [[1, 0, 1, 0], [1, 1, 1, 1]],
+            [[1, 1, 1, 0], [1, 0, 1, 1]],
+            [[1, 1, 1, 1], [0, 0, 0, 0]],
+        ];
+        function renderState(parent, state) {
+            const div = parent.appendChild(document.createElement("div"));
+            div.classList.add("cell-row");
+            for (const a of state) {
+                const cell = div.appendChild(document.createElement("div"));
+                cell.classList.add("cell");
+                if (a) cell.classList.add("red");
+            }
+            return div;
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById(`transformations-container`);
+            for (const [from, to] of transformations) {
+                const div = container.appendChild(document.createElement("div"));
+                div.classList.add("transformation");
+                renderState(div, from);
+                const arrowsContainer = div.appendChild(document.createElement("div"));
+                arrowsContainer.classList.add("cell-row");
+                for (let i = 0; i < 4; i++) {
+                    const arrow = arrowsContainer.appendChild(document.createElement("div"));
+                    arrow.classList.add("arrow");
+                    arrow.innerHTML = "&#129047;";
+                }
+                renderState(div, to);
+            }
+        });
+    </script>
+    <style>
+        .swan-page p,
+        .swan-page li {
+            font-size: 10pt;
+        }
+
+        .arrow {
+            width: 28px;
+            height: 24px;
+            margin-bottom: -18px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .cell-row {
+            display: flex;
+        }
+
+        .cell {
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border: solid 2px black;
+        }
+
+        .cell.red {
+            background-color: red;
+        }
+
+        .transformations-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            flex-direction: column;
+        }
+
+        .transformation {
+            margin: 16px;
+        }
+
+        #example {
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-02">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">The Swan't</span>
+            </div>
+            <div class="page-content swan-page">
+                <img src="img/Component/The Swan't.svg" class="diagram">
+                <h2>On the Subject of The Swan't</h2>
+                <p class="flavour-text">Every 108 <s>minutes</s> seconds, the button must <b>NOT</b> be pushed...</p>
+                <ul>
+                    <li>The module consists of twelve keypads, an 'Execute' button, a computer screen and a countdown timer.</li>
+                    <li>Some numbers of the code <strong>4, 8, 15, 16, 23, 42</strong> will be missed on the keypads.</li>
+                    <li>If all these numbers are present you are looking at another module. See <a href="/HTML/The%Swan.html">"The Swan" manual</a>.</li>
+                    <li>
+                        For 108 seconds, <b>NO</b> button should be pushed.
+                        From the moment the alarm sounds, you will have 40 seconds to <b>NOT</b> enter the code and <b>NOT</b> push the execute button.
+                    </li>
+                    <li>
+                        The expiration of the timer will result in a system failure and the module transition to the next state.
+                        You will only get a strike if you have pressed any key before.
+                    </li>
+                </ul>
+                <p>
+                    After a system failure, the counter will display four digits and some components of the counter will be colored red instead of black and white.
+                    Based on this information, you will need to get and enter a six-number code and press the 'Execute' button.
+                    Pressing a non 'Execute' key after entering six numbers will reset the entry.
+                </p>
+                <div class="diagram" id="transformations-container">
+
+                </div>
+                <ul>
+                    <li>Find the possible combinations of the two positions (1-4) of the non-red counter components.</li>
+                    <li>If there are fewer than two non-red components, then find combinations of the two positions of the red components instead.</li>
+                    <li>Convert these combinations to two-digit numbers.</li>
+                    <li>Among these numbers, possible entries are those that have not yet been pressed before.</li>
+                    <li>
+                        If all such numbers have been pressed before,
+                        then all numbers that represent a pair of component positions are available for input regardless of the color of the component.
+                    </li>
+                    <li>After entering six numbers, press the 'Execute' button to execute the entered code.</li>
+                    <li>When the number is executed, the component with the position equal to the first digit of the number will decrease its digit by two.</li>
+                    <li>The component with the position equal to the second digit of the number will decrease its digit by one.</li>
+                    <li>If any of the following conditions are met, then you will receive a strike and the module will reset:
+                        <ul>
+                            <li>the number does not consist of two digits</li>
+                            <li>the digits match</li>
+                            <li>the digits are not in the range from 1 to 4</li>
+                            <li>the number is not available for input</li>
+                            <li>the digit on any component will decrease below zero</li>
+                        </ul>
+                    </li>
+                    <li>
+                        After processing each number, the colors of the components will change.
+                        Use the diagrams to the right to determine the new positions of the red components.
+                        In these diagrams, the positions of the components can be shifted in a loop.
+                    </li>
+                </ul>
+                <p id="example"><a href="The%20Swan't%20(Example).html">Example of the puzzle generator</a></p>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 1</div>
+        </div>
+    </div>
+</body>
+
+</html>

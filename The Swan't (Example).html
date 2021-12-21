@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1">
-    <title>Cellular Swan — Example</title>
+    <title>Swan't — Example</title>
     <script>
         const STAGES_COUNT = 6;
 
@@ -65,21 +65,29 @@
                 solution.push(pair);
                 if (!set.has(`${pair[0]}${pair[1]}`)) {
                     set.add(`${pair[0]}${pair[1]}`);
-                    buttons.push([pair[0], pair[1]]);
+                    buttons.push(`${pair[0] + 1}${pair[1] + 1}`);
                 }
             }
             logs.push(`Solution: ${solution.map(([i, j]) => `${i + 1}${j + 1}`).join(", ")}`);
+            const topPriorButtons = shuffled(["4", "8", "15", "16", "48"]);
+            const lowPriorButtons = shuffled(["18", "25", "26", "28", "35", "36", "38", "45", "46", "51", "52", "53", "54", "61", "62", "63", "64"]);
             while (buttons.length < 12) {
                 const i = Math.floor(Math.random() * 4);
                 let j = Math.floor(Math.random() * 3);
                 if (j >= i) j += 1;
-                buttons.push([i, j]);
+                if (!set.has(`${i}${j}`)) {
+                    set.add(`${i}${j}`);
+                    buttons.push(`${i + 1}${j + 1}`);
+                    continue;
+                }
+                if (topPriorButtons.length > 0) buttons.push(topPriorButtons.pop());
+                else buttons.push(lowPriorButtons.pop());
             }
             buttons = shuffled(buttons);
             logs = [
                 `Initial displays: ${automata[0].map(j => j === 0 ? "-" : "R").join("")}`,
                 `Initial values: ${values.join(", ")}`,
-                `Buttons: ${buttons.map(([i, j]) => `${i + 1}${j + 1}`).join(", ")}`,
+                `Buttons: ${buttons.join(", ")}`,
                 ...logs,
             ];
             for (const log of logs) console.log(log);
@@ -91,7 +99,7 @@
             }
             for (let i = 0; i < 12; i++) {
                 const div = document.getElementById(`button-${i + 1}`);
-                div.innerText = buttons[i].map(j => j + 1).join("");
+                div.innerText = buttons[i];
             }
         }
 
@@ -114,9 +122,11 @@
             display: flex;
             height: 100vh;
             overflow-y: hidden;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             margin: 0;
+            color: darkgray;
         }
 
         body > div {
@@ -228,4 +238,5 @@
             <!-- <div class="button" id="exec-button">EXECUTE</div> -->
         </div>
     </div>
+    <p>To see logs with solution: F12 => Console</p>
 </body>
