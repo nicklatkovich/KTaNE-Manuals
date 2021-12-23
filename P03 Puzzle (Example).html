@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>P03 Puzzle — Example</title>
+    <script>
+        function shuffled(arr) {
+            const res = [...arr];
+            for (let i = 0; i < res.length; i++) {
+                const j = Math.floor(Math.random() * res.length);
+                if (i === j) continue;
+                [res[i], res[j]] = [res[j], res[i]];
+            }
+            return res;
+        }
+
+        function range(count, map) { return new Array(count).fill(0).map((_, i) => map ? map(i) : i); }
+        function rand(count) { return Math.floor(Math.random() * count); }
+        function wait(ms) { return new Promise((resolve) => setTimeout(() => resolve(), ms)); }
+
+        const LINE_LENGTH = 6;
+        const ROWS_COUNT = 2;
+        const ANIMATION_DELAY = 200;
+
+        let allConductorsTypes;
+        let puzzle;
+        let objects = {
+            conductors: range(4, () => null),
+            conductorsCounts: range(4, () => null),
+            cells: range(ROWS_COUNT, () => range(LINE_LENGTH, () => null)),
+            submit: null,
+            reset: null,
+            sums: range(ROWS_COUNT, () => null),
+        };
+        let currentSelectedConductorIndex = null;
+        let conductors = range(ROWS_COUNT, () => range(LINE_LENGTH, () => null));
+        let conductorsCounts = range(4, () => 0);
+        let solvingAnimation = false;
+        let resetIsActive = true;
+
+        function onConductorPressed(index) {
+            if (solvingAnimation) return;
+            if (currentSelectedConductorIndex === index) {
+                objects.conductors[index].classList.remove("active");
+                objects.conductors[index].classList.remove("increased");
+                currentSelectedConductorIndex = null;
+                return;
+            }
+            if (conductorsCounts[index] === 0) return;
+            if (currentSelectedConductorIndex !== null) {
+                objects.conductors[currentSelectedConductorIndex].classList.remove("active");
+                objects.conductors[currentSelectedConductorIndex].classList.remove("increased");
+            }
+            objects.conductors[index].classList.add("active", "increased");
+            currentSelectedConductorIndex = index;
+        }
+
+        function onCellPressed(rowIndex, cellIndex) {
+            if (solvingAnimation) return;
+            const currentConductor = conductors[rowIndex][cellIndex];
+            if (currentConductor !== null) {
+                const conductorIndex = allConductorsTypes.indexOf(currentConductor);
+                conductorsCounts[conductorIndex] += 1;
+                objects.conductorsCounts[conductorIndex].innerText = conductorsCounts[conductorIndex];
+                objects.cells[rowIndex][cellIndex].innerText = puzzle.rows[rowIndex][cellIndex];
+                conductors[rowIndex][cellIndex] = null;
+                objects.submit.classList.add("hidden");
+                return;
+            }
+            if (currentSelectedConductorIndex === null) return;
+            conductors[rowIndex][cellIndex] = allConductorsTypes[currentSelectedConductorIndex];
+            objects.cells[rowIndex][cellIndex].innerText = allConductorsTypes[currentSelectedConductorIndex];
+            conductorsCounts[currentSelectedConductorIndex] -= 1;
+            objects.conductorsCounts[currentSelectedConductorIndex].innerText = conductorsCounts[currentSelectedConductorIndex];
+            if (conductorsCounts[currentSelectedConductorIndex] > 0) return;
+            objects.conductors[currentSelectedConductorIndex].classList.remove("active");
+            objects.conductors[currentSelectedConductorIndex].classList.remove("increased");
+            currentSelectedConductorIndex = null;
+            if (conductorsCounts.some((a) => a > 0)) return;
+            objects.submit.classList.remove("hidden");
+        }
+
+        function onResetPressed() {
+            if (!resetIsActive) return;
+            if (solvingAnimation) {
+                for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                    for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) {
+                        if (conductors[rowIndex][cellIndex] !== null) continue;
+                        objects.cells[rowIndex][cellIndex].innerText = puzzle.rows[rowIndex][cellIndex];
+                    }
+                    objects.sums[rowIndex].innerText = `0 / ${puzzle.requested[rowIndex]}`;
+                }
+                solvingAnimation = false;
+                return;
+            }
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) {
+                    const conductor = conductors[rowIndex][cellIndex];
+                    if (conductor === null) continue;
+                    const conductorIndex = allConductorsTypes.indexOf(conductor);
+                    conductorsCounts[conductorIndex] += 1;
+                    objects.conductorsCounts[conductorIndex].innerText = conductorsCounts[conductorIndex];
+                    conductors[rowIndex][cellIndex] = null;
+                    objects.cells[rowIndex][cellIndex].innerText = puzzle.rows[rowIndex][cellIndex];
+                }
+                objects.sums[rowIndex].innerText = `0 / ${puzzle.requested[rowIndex]}`;
+            }
+            objects.submit.classList.add("hidden");
+            if (currentSelectedConductorIndex === null) return;
+            objects.conductors[currentSelectedConductorIndex].classList.remove("active");
+            objects.conductors[currentSelectedConductorIndex].classList.remove("increased");
+            currentSelectedConductorIndex = null;
+        }
+
+        async function onSubmitPressed() {
+            if (solvingAnimation) return;
+            resetIsActive = false;
+            solvingAnimation = true;
+            objects.submit.classList.add("hidden");
+            objects.reset.classList.add("hidden");
+            results = range(ROWS_COUNT, (rowIndex) => range(LINE_LENGTH, (cellIndex) => conductors[rowIndex][cellIndex] === null ? puzzle.rows[rowIndex][cellIndex] : 0));
+            const sums = range(ROWS_COUNT, () => 0);
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) {
+                    const conductor = conductors[rowIndex][cellIndex];
+                    if (conductor === null || conductor === "null") continue;
+                    const diff = { zero: 0, neg: -1, pos: 1 }[conductor];
+                    let pos = cellIndex + 1;
+                    const cells = [objects.cells[rowIndex][cellIndex]];
+                    while (pos < LINE_LENGTH) {
+                        cells.push(objects.cells[rowIndex][pos]);
+                        if (conductors[rowIndex][pos] === null) { pos += 1; continue; }
+                        if (conductors[rowIndex][pos] === "null") break;
+                        for (const cell of cells) cell.classList.add("active");
+                        await wait(ANIMATION_DELAY);
+                        const newDiff = diff + { zero: 0, neg: -1, pos: 1 }[conductors[rowIndex][pos]];
+                        if (newDiff !== 0) {
+                            for (let i = cellIndex + 1; i < pos; i++) {
+                                if (conductors[rowIndex][i] !== null) continue;
+                                objects.cells[rowIndex][i].classList.add("increased");
+                                await wait(ANIMATION_DELAY);
+                                results[rowIndex][i] += newDiff;
+                                objects.cells[rowIndex][i].innerText = results[rowIndex][i];
+                                objects.cells[rowIndex][i].classList.remove("increased");
+                                await wait(ANIMATION_DELAY);
+                            }
+                        }
+                        for (const cell of cells) cell.classList.remove("active");
+                        await wait(ANIMATION_DELAY);
+                        pos += 1;
+                    }
+                }
+                for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) {
+                    if (conductors[rowIndex][cellIndex] !== null) continue;
+                    const diff = results[rowIndex][cellIndex];
+                    objects.cells[rowIndex][cellIndex].classList.add("increased");
+                    if (diff !== 0) objects.sums[rowIndex].classList.add("increased");
+                    await wait(ANIMATION_DELAY);
+                    sums[rowIndex] += diff;
+                    objects.sums[rowIndex].innerText = `${sums[rowIndex]} / ${puzzle.requested[rowIndex]}`;
+                    objects.cells[rowIndex][cellIndex].classList.remove("increased");
+                    objects.sums[rowIndex].classList.remove("increased");
+                    await wait(ANIMATION_DELAY);
+                }
+            }
+            if (range(ROWS_COUNT).every((rowIndex) => sums[rowIndex] === puzzle.requested[rowIndex])) return;
+            objects.reset.classList.remove("hidden");
+            resetIsActive = true;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const rows = range(ROWS_COUNT, () => range(LINE_LENGTH, () => rand(7) - 2));
+            const conductors = { null: 0, zero: 0, pos: 0, neg: 0 };
+            allConductorsTypes = shuffled(Object.keys(conductors));
+            const solution = range(ROWS_COUNT, () => range(LINE_LENGTH, () => null));
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                const row = rows[rowIndex];
+                const conductorsCount = rand(3) + 2;
+                for (let conductorIndex = 0; conductorIndex < conductorsCount; conductorIndex++) {
+                    const conductor = allConductorsTypes[rand(allConductorsTypes.length)];
+                    const possiblePositions = [];
+                    for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) if (solution[rowIndex][cellIndex] === null) possiblePositions.push(cellIndex);
+                    const positionIndex = possiblePositions[rand(possiblePositions.length)];
+                    solution[rowIndex][positionIndex] = conductor;
+                    conductors[conductor] += 1;
+                }
+            }
+            const solutionChecker = range(ROWS_COUNT, (rowIndex) => range(LINE_LENGTH, (cellIndex) => rows[rowIndex][cellIndex]));
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) {
+                    const conductor = solution[rowIndex][cellIndex];
+                    if (conductor === null) continue;
+                    solutionChecker[rowIndex][cellIndex] = 0;
+                    if (conductor === "null") continue;
+                    const diff = { zero: 0, neg: -1, pos: 1 }[conductor];
+                    const dir = 1;
+                    let pos = cellIndex + dir;
+                    while (pos < LINE_LENGTH) {
+                        if (solution[rowIndex][pos] === null) { pos += dir; continue; }
+                        if (solution[rowIndex][pos] === "null") break;
+                        const newDiff = diff + { zero: 0, neg: -1, pos: 1 }[solution[rowIndex][pos]];
+                        if (newDiff === 0) { pos += dir; continue; }
+                        for (let i = cellIndex; i !== pos; i += dir) {
+                            if (solution[rowIndex][i] !== null) continue;
+                            solutionChecker[rowIndex][i] += newDiff;
+                        }
+                        pos += dir;
+                    }
+                }
+            }
+            const requested = range(ROWS_COUNT, (rowIndex) => solutionChecker[rowIndex].reduce((acc, e) => acc + e, 0));
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                console.log(`ROW #${rowIndex + 1}: ${rows[rowIndex].map((v) => v.toString(10).padStart(3, " ")).join(" ")}    REQUESTED: ${requested[rowIndex]}`);
+            }
+            for (let conductorIndex = 0; conductorIndex < 4; conductorIndex++) {
+                const type = allConductorsTypes[conductorIndex];
+                const count = conductors[type];
+                if (count < 1) continue;
+                console.log(`${type.padStart(4, " ")}-conductors: ${count}`);
+            }
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                const sol = solution[rowIndex].map((c, i) => (c === null ? solutionChecker[rowIndex][i].toString(10) : c).padStart(2, " ").padEnd(6, " ")).join("");
+                console.log(`ROW #${rowIndex + 1} SOLUTION:   ${sol}`);
+            }
+            puzzle = { rows, conductors, solution, requested };
+
+            const allConductorsContainer = document.getElementById("conductors");
+            for (let conductorIndex = 0; conductorIndex < allConductorsTypes.length; conductorIndex++) {
+                const conductorType = allConductorsTypes[conductorIndex];
+                if (conductors[conductorType] < 1) continue;
+                const conductorContainer = allConductorsContainer.appendChild(document.createElement("div"));
+                conductorContainer.classList.add("flex", "column");
+                const conductor = conductorContainer.appendChild(document.createElement("div"));
+                conductor.classList.add("flex", "cell", "conductor");
+                conductor.innerText = conductorType;
+                conductor.onclick = () => onConductorPressed(conductorIndex);
+                objects.conductors[conductorIndex] = conductor;
+                const count = conductorContainer.appendChild(document.createElement("div"));
+                count.innerText = conductors[conductorType];
+                objects.conductorsCounts[conductorIndex] = count;
+                conductorsCounts[conductorIndex] = conductors[conductorType];
+            }
+            const linesContainer = document.getElementById("lines");
+            for (let rowIndex = 0; rowIndex < ROWS_COUNT; rowIndex++) {
+                const line = linesContainer.appendChild(document.createElement("div"));
+                line.classList.add("flex");
+                for (let cellIndex = 0; cellIndex < LINE_LENGTH; cellIndex++) {
+                    const cell = line.appendChild(document.createElement("div"));
+                    cell.classList.add("flex", "cell");
+                    cell.innerText = rows[rowIndex][cellIndex];
+                    cell.onclick = () => onCellPressed(rowIndex, cellIndex);
+                    objects.cells[rowIndex][cellIndex] = cell;
+                }
+                const lineRes = line.appendChild(document.createElement("div"));
+                lineRes.classList.add("request");
+                lineRes.innerText = `0 / ${requested[rowIndex]}`;
+                objects.sums[rowIndex] = lineRes;
+            }
+            objects.submit = document.getElementById("submit");
+            objects.submit.onclick = () => onSubmitPressed();
+            objects.reset = document.getElementById("reset");
+            objects.reset.onclick = () => onResetPressed();
+        });
+    </script>
+    <style>
+        body {
+            overflow-y: hidden;
+            color: white;
+            background-color: #282d36;
+            height: 100vh;
+        }
+
+        .flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .column {
+            flex-direction: column;
+        }
+
+        .cell {
+            width: 64px;
+            height: 92px;
+            margin: 16px 2px;
+            border: solid 2px darkgray;
+            cursor: pointer;
+            user-select: none;
+            transition: all .2s;
+        }
+
+        .request {
+            width: 128px;
+            text-align: center;
+        }
+
+        .cell.active {
+            border-color: aqua;
+        }
+
+        .cell.increased {
+            font-size: 24px;
+        }
+
+        .space-evenly {
+            justify-content: space-evenly;
+        }
+
+        .full-height {
+            height: 100%;
+        }
+
+        .button {
+            border: solid 2px lightgray;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .button.hidden {
+            visibility: hidden;
+            cursor: auto;
+        }
+    </style>
+</head>
+
+<body class="flex column">
+    <div class="flex" id="conductors"></div>
+    <div class="flex" style="margin-top: 64px;">
+        <div class="flex column" id="lines"></div>
+        <div class="flex column space-evenly full-height">
+            <div class="button hidden" id="submit">SUBMIT</div>
+            <div class="button" id="reset">RESET</div>
+        </div>
+    </div>
+</body>

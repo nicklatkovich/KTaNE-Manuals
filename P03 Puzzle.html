@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>P03 Puzzle — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <style>
+        ul {
+            font-size: 14px;
+            margin-top: 0;
+        }
+
+        #example {
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-02">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">P03 Puzzle</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/P03 Puzzle.svg" class="diagram">
+                <h2>On the Subject of P03 Puzzle</h2>
+                <p class="flavour-text">The Great Transcendence is coming</p>
+                <p>
+                    The module has two rows of six cells. Each cell contains a number.
+                    On the top side of the module there are four types of conductors and their number.
+                </p>
+                <p style="margin-bottom: 0;">Types of conductors:</p>
+                <ul>
+                    <li>Zero-Conductor: Has no effects, but completes the circuit.</li>
+                    <li>Positive Conductor: The numbers in the circuit completed by this conductor get +1.</li>
+                    <li>Negative Conductor: The numbers in the circuit completed by this conductor get -1.</li>
+                    <li>Null-Conductor: Breaks the circuit.</li>
+                </ul>
+                <p>
+                    To place a conductor on a cell, press the type of conductor and then press the cell where you want to place it.
+                    To remove a conductor from a cell, press the cell once.
+                    There is also a reset button on the right side of the module that will remove all conductors. 
+                    When all available conductors have been placed, a button with a lightning bolt will appear - this is a submit button.
+                    The module will be solved if the sum of numbers in cells not occupied by conductors in each row is equal to requested.
+                    Otherwise, you will receive a strike.
+                </p>
+                <p>
+                    One and the same cell can belong to several completed circuits at the same time.
+                    So, for example, three positive conductors will create three different completed circuits, in which each number will be increased by +4,
+                    since it will belong to two of these three completed circuits,
+                    and each completed circuit will give +2, since it is closed by two positive conductors.
+                </p>
+                <p id="example"><a href="P03%20Puzzle%20(Example).html">Generator and module draft</a></p>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 1</div>
+        </div>
+    </div>
+</body>
+
+</html>
