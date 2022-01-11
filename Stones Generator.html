@@ -42,15 +42,16 @@
             user-select: none;
         }
 
-        td:not(.brown):hover {
+        td:not(.brown):not(.disabled):hover {
             border-color: red;
             outline: solid 2px red;
         }
 
         td.brown { background-color: #660; }
+        td.disabled { background-color: #888; }
         td.error { color: red; }
         .column { flex-direction: column; }
-        td:not(.brown) { cursor: pointer; }
+        td:not(.brown):not(.disabled) { cursor: pointer; }
         #buttons-container { margin-bottom: 32px; }
         #progress { font-size: 32px; }
         #progress.solved { color: #0c0; }
@@ -208,6 +209,23 @@
                 }
                 if (shouldBreak) break;
             }
+            const disables = new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(false));
+            for (let x = 0; x < SIZE; x++) {
+                for (let y = 0; y < SIZE; y++) {
+                    if (placed[x][y]) continue;
+                    if (Math.random() < 0.5) continue;
+                    disables[x][y] = true;
+                }
+            }
+            for (let y = 0; y < SIZE; y++) {
+                let str = "";
+                for (let x = 0; x < SIZE; x++) {
+                    if (!placed[x][y]) str += disables[x][y] ? "   " : " . ";
+                    else if (grid[x][y] === 1) str += " B ";
+                    else str += grid[x][y].toString(10).padStart(2, " ").padEnd(3, " ");
+                }
+                console.log(str);
+            }
 
             const placements = new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(0));
 
@@ -241,6 +259,7 @@
              */
             function onCellPressed(x, y) {
                 if (grid[x][y] === 1 && placed[x][y]) return;
+                if (disables[x][y]) return;
                 if (placements[x][y] > 0) {
                     if (placements[x][y] === lastPlacedNumber) {
                         placements[x][y] = 0;
@@ -324,10 +343,8 @@
                     const td = tr.appendChild(document.createElement("td"));
                     gridCells[x][y] = td;
                     td.onclick = () => onCellPressed(x, y);
-                    if (placed[x][y]) {
-                        if (grid[x][y] === 1) td.classList.add("brown");
-                        // else td.innerText = grid[x][y];
-                    }
+                    if (placed[x][y] && grid[x][y] === 1) td.classList.add("brown");
+                    else if (disables[x][y]) td.classList.add("disabled");
                 }
             }
         });
