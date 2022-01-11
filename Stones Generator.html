@@ -309,13 +309,13 @@
                 placements[x][y] = 0;
                 gridCells[x][y].classList.remove("error");
                 gridCells[x][y].innerText = "";
+                errors.delete(lastPlacedNumber);
                 lastPlacedNumber -= 1;
                 if (!history.length) {
                     cancelButton.disabled = true;
                     resetButton.disabled = true;
                 }
                 onPlacementChanged();
-                errors.clear();
             };
 
             /** @type {HTMLButtonElement} */
