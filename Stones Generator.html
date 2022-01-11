@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Stones Puzzle — Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 32px;
+            width: calc(100vw - 65px);
+            min-width: 640px;
+            height: calc(100vh - 65px);
+            min-height: 480px;
+            color: white;
+            background-color: #282d36;
+        }
+
+        .flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        table {
+            border-spacing: 0;
+            border: solid #888 2px;
+            border-radius: 4px;
+        }
+
+        td {
+            width: 48px;
+            height: 48px;
+            border: solid #888 2px;
+        }
+
+        td {
+            text-align: center;
+            font-size: 32px;
+            color: #ccc;
+            user-select: none;
+        }
+
+        td:not(.brown):hover {
+            border-color: red;
+            outline: solid 2px red;
+        }
+
+        td.brown { background-color: #660; }
+        td.error { color: red; }
+        .column { flex-direction: column; }
+        #buttons-container { margin-bottom: 32px; }
+        #progress { font-size: 32px; }
+        #progress.solved { color: #0c0; }
+        #progress.error { color: red; }
+
+        button {
+            border: solid #ccc 4px;
+            padding: 8px;
+            margin: 8px;
+            color: #ccc;
+            font-weight: bold;
+            font-size: 24px;
+            background-color: #282d36;
+            border-radius: 16px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            border-color: #666;
+            color: #666;
+            cursor: default;
+        }
+
+        button:not(:disabled):hover {
+            background-color: #444;
+            border-color: white;
+            color: white;
+        }
+    </style>
+    <script>
+        const SIZE = 8;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            /**
+             * @template T
+             * @param {T[]} arr
+             * @returns {T[]}
+             */
+            function shuffled(arr) {
+                const res = [...arr];
+                for (let i = 0; i < res.length; i++) {
+                    const j = Math.floor(Math.random() * res.length);
+                    if (i === j) continue;
+                    [res[i], res[j]] = [res[j], res[i]];
+                }
+                return res;
+            }
+
+            const grid = new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(0));
+            const placed = new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(false));
+            /** @type {Map<number, [number, number][]>} */
+            const cells = new Map();
+
+            /**
+             * @param {number} x
+             * @param {number} y
+             * @returns {boolean}
+             */
+            function canPlaceBrown(x, y) {
+                for (const dx of [-1, 0, 1]) {
+                    for (const dy of [-1, 0, 1]) {
+                        if (dx === 0 && dy === 0) continue;
+                        const x1 = x + dx;
+                        const y1 = y + dy;
+                        if (x1 < 0 || x1 >= SIZE || y1 < 0 || y1 >= SIZE) continue;
+                        if (placed[x1][y1] && grid[x1][y1] > 1) return false;
+                    }
+                }
+                return true;
+            }
+
+            /**
+             * @param {number} x
+             * @param {number} y
+             * @param {number} v
+             */
+            function set(x, y, v) {
+                if (placed[x][y]) return;
+                if (grid[x][y] > 0) {
+                    cells.set(grid[x][y], cells.get(grid[x][y]).filter(([x1, y1]) => x1 !== x || y1 !== y));
+                    if (!cells.get(grid[x][y]).length) cells.delete(grid[x][y]);
+                }
+                grid[x][y] = v;
+                if (v > 0) cells.set(v, [...cells.get(v) || [], [x, y]]);
+            }
+
+            /**
+             * @param {number} x
+             * @param {number} y
+             */
+            function commit(x, y) {
+                if (placed[x][y]) return;
+                placed[x][y] = true;
+                if (grid[x][y] > 0) {
+                    cells.set(grid[x][y], cells.get(grid[x][y]).filter(([x1, y1]) => x1 !== x || y1 !== y));
+                    if (!cells.get(grid[x][y]).length) cells.delete(grid[x][y]);
+                }
+                for (const dx of [-1, 0, 1]) {
+                    for (const dy of [-1, 0, 1]) {
+                        if (dx === 0 && dy === 0) continue;
+                        const x1 = x + dx;
+                        const y1 = y + dy;
+                        if (x1 < 0 || x1 >= SIZE || y1 < 0 || y1 >= SIZE) continue;
+                        if (placed[x1][y1]) continue;
+                        set(x1, y1, grid[x1][y1] + grid[x][y]);
+                    }
+                }
+            }
+
+            const xs = Math.floor(Math.random() * SIZE);
+            const ys = Math.floor(Math.random() * SIZE);
+            set(xs, ys, 1);
+            commit(xs, ys);
+            let prevPlacedNumber = 1;
+            while (true) {
+                let shouldBreak = true;
+                const numberToPlace = prevPlacedNumber + 1;
+                const cs = cells.get(numberToPlace) || [];
+                if (cs.length > 0) {
+                    const [xp, yp] = cs[Math.floor(Math.random() * cs.length)];
+                    commit(xp, yp);
+                    prevPlacedNumber = numberToPlace;
+                    continue;
+                }
+                for (let j = 1; j <= 5; j++) {
+                    for (const [x, y] of shuffled(cells.get(numberToPlace - j) || [])) {
+                        /** @type {[number, number][]} */
+                        let possibleBrownCells = [];
+                        for (const dx of [-1, 0, 1]) {
+                            for (const dy of [-1, 0, 1]) {
+                                if (dx === 0 && dy === 0) continue;
+                                const x1 = x + dx;
+                                const y1 = y + dy;
+                                if (x1 < 0 || x1 >= SIZE || y1 < 0 || y1 >= SIZE) continue;
+                                if (placed[x1][y1]) continue;
+                                if (canPlaceBrown(x1, y1)) possibleBrownCells.push([x1, y1]);
+                            }
+                        }
+                        if (possibleBrownCells.length < j) continue;
+                        for (let k = 0; k < j; k++) {
+                            const ind = Math.floor(Math.random() * possibleBrownCells.length);
+                            const [x1, y1] = possibleBrownCells[ind];
+                            possibleBrownCells[ind] = possibleBrownCells[possibleBrownCells.length - 1];
+                            possibleBrownCells.pop();
+                            set(x1, y1, 1);
+                            commit(x1, y1);
+                        }
+                        // set(x, y, numberToPlace);
+                        commit(x, y);
+                        prevPlacedNumber = numberToPlace;
+                        shouldBreak = false;
+                        break;
+                    }
+                    if (!shouldBreak) break;
+                }
+                if (shouldBreak) break;
+            }
+
+            const placements = new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(0));
+
+            /** @type {[number, number][]} */
+            let history = [];
+
+            let lastPlacedNumber = 1;
+
+            /** @type {HTMLTableCellElement[][]} */
+            const gridCells = new Array(SIZE).fill(0).map(() => new Array(SIZE).fill(null));
+
+            const progress = document.getElementById("progress");
+            progress.innerText = `2 / ${prevPlacedNumber + 1}`;
+
+            /** @type {Set<number>} */
+            let errors = new Set();
+
+            function onPlacementChanged() {
+                progress.innerText = `${lastPlacedNumber + 1} / ${prevPlacedNumber + 1}`;
+                if (errors.size > 0) progress.classList.add("error");
+                else {
+                    progress.classList.remove("error");
+                    if (lastPlacedNumber >= prevPlacedNumber) progress.classList.add("solved");
+                    else progress.classList.remove("solved");
+                }
+            }
+
+            /**
+             * @param {number} x
+             * @param {number} y
+             */
+            function onCellPressed(x, y) {
+                if (grid[x][y] === 1 && placed[x][y]) return;
+                if (placements[x][y] > 0) {
+                    if (placements[x][y] === lastPlacedNumber) {
+                        placements[x][y] = 0;
+                        gridCells[x][y].classList.remove("error");
+                        gridCells[x][y].innerText = "";
+                        errors.delete(lastPlacedNumber);
+                        lastPlacedNumber -= 1;
+                        history.pop();
+                        if (!history.length) {
+                            cancelButton.disabled = true;
+                            resetButton.disabled = true;
+                        }
+                        onPlacementChanged();
+                    }
+                    return;
+                }
+                lastPlacedNumber += 1;
+                placements[x][y] = lastPlacedNumber;
+                gridCells[x][y].innerText = lastPlacedNumber;
+                let sum = 0;
+                for (const dx of [-1, 0, 1]) {
+                    for (const dy of [-1, 0, 1]) {
+                        if (dx === 0 && dy === 0) continue;
+                        const x1 = x + dx;
+                        const y1 = y + dy;
+                        if (x1 < 0 || x1 >= SIZE || y1 < 0 || y1 >= SIZE) continue;
+                        if (grid[x1][y1] === 1 && placed[x1][y1]) sum += 1;
+                        else sum += placements[x1][y1];
+                    }
+                }
+                if (sum !== lastPlacedNumber) {
+                    errors.add(lastPlacedNumber);
+                    gridCells[x][y].classList.add("error");
+                }
+                onPlacementChanged();
+                history.push([x, y]);
+                cancelButton.disabled = false;
+                resetButton.disabled = false;
+            }
+
+            /** @type {HTMLButtonElement} */
+            const cancelButton = document.getElementById("cancel-btn");
+            cancelButton.disabled = true;
+            cancelButton.onclick = () => {
+                if (!history.length) return;
+                const [x, y] = history.pop();
+                placements[x][y] = 0;
+                gridCells[x][y].classList.remove("error");
+                gridCells[x][y].innerText = "";
+                lastPlacedNumber -= 1;
+                if (!history.length) {
+                    cancelButton.disabled = true;
+                    resetButton.disabled = true;
+                }
+                onPlacementChanged();
+                errors.clear();
+            };
+
+            /** @type {HTMLButtonElement} */
+            const resetButton = document.getElementById("reset-btn");
+            resetButton.disabled = true;
+            resetButton.onclick = () => {
+                if (!history.length) return;
+                for (const [x, y] of history) {
+                    placements[x][y] = 0;
+                    gridCells[x][y].classList.remove("error");
+                    gridCells[x][y].innerText = "";
+                }
+                lastPlacedNumber = 1;
+                history = [];
+                cancelButton.disabled = true;
+                resetButton.disabled = true;
+                onPlacementChanged();
+                errors.clear();
+            };
+
+            const table = document.getElementById("grid");
+            for (let y = 0; y < SIZE; y++) {
+                const tr = table.appendChild(document.createElement("tr"));
+                for (let x = 0; x < SIZE; x++) {
+                    const td = tr.appendChild(document.createElement("td"));
+                    gridCells[x][y] = td;
+                    td.onclick = () => onCellPressed(x, y);
+                    if (placed[x][y]) {
+                        if (grid[x][y] === 1) td.classList.add("brown");
+                        // else td.innerText = grid[x][y];
+                    }
+                }
+            }
+        });
+    </script>
+</head>
+
+<body class="flex column">
+    <div id="buttons-container">
+        <button disabled="disabled" id="reset-btn">RESET</button>
+        <button disabled="disabled" id="cancel-btn">CANCEL</button>
+        <span id="progress"></span>
+    </div>
+    <table>
+        <tbody id="grid">
+        </tbody>
+    </table>
+</body>

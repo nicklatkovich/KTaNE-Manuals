@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faeyan Symbols Generator</title>
+    <style>
+        body {
+            background-color: #282d36;
+            margin: 0;
+            width: calc(100vw - 5px);
+            height: calc(100vh - 5px);
+            min-width: 480px;
+            min-height: 640px;
+        }
+
+        #canvas {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <script>
+        const HALF_SYMBOL_SIZE = 32;
+        const SYMBOLS_INTERVAL = 16;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            /** @type {HTMLCanvasElement} */
+            const canvas = document.getElementById("canvas");
+            canvas.width = document.body.clientWidth;
+            canvas.height = document.body.clientHeight;
+            const context = canvas.getContext("2d");
+            context.strokeStyle = "white";
+            context.lineWidth = 8;
+            context.lineCap = "round";
+            const charsDiff = 2 * HALF_SYMBOL_SIZE + SYMBOLS_INTERVAL;
+            const charsWidth = Math.ceil((canvas.width - 16) / charsDiff);
+            const charsHeight = Math.ceil((canvas.height - 16) / charsDiff);
+            const xOffset = Math.floor((canvas.width - SYMBOLS_INTERVAL - charsWidth * charsDiff) / 2);
+            const yOffset = Math.floor((canvas.height - SYMBOLS_INTERVAL - charsHeight * charsDiff) / 2);
+            /**
+             * @param {number} xx
+             * @param {number} yy
+             */
+            const genAndRenderChar = (xx, yy) => {
+                const x = xOffset + SYMBOLS_INTERVAL + xx * charsDiff;
+                const y = yOffset + SYMBOLS_INTERVAL + yy * charsDiff;
+                let vs = [0, 0, 0, 0];
+                const offsets = [[0, 0], [1, 0], [0, 1], [1, 1]];
+                for (let partIndex = 0; partIndex < 4; partIndex++) {
+                    let its = 4;
+                    if (partIndex === 1 && (vs[0] & (1 << 3)) > 0) its = 3;
+                    else if (partIndex === 2 && (vs[0] & (1 << 4)) > 0) its = 3;
+                    else if (partIndex === 3) {
+                        if ((vs[1] & (1 << 4)) > 0) its -= 1;
+                        if ((vs[2] & (1 << 3)) > 0) its -= 1;
+                    }
+                    for (let i = 0; i < its; i++) {
+                        const [x1, y1] = offsets[partIndex];
+                        const a = Math.floor(Math.random() * 6) + 1;
+                        if ((vs[partIndex] & (1 << a)) > 0) break;
+                        if (partIndex === 1 && a === 2) break;
+                        if (partIndex === 2 && a === 1) break;
+                        if (partIndex === 3 && a === 1) break;
+                        if (partIndex === 3 && a === 2) break;
+                        vs[partIndex] |= 1 << a;
+                        /** @type {number[]} */
+                        let [fromx, fromy, tox, toy] = [];
+                        if (a === 1) [fromx, fromy, tox, toy] = [0, 0, 1, 0];
+                        else if (a === 2) [fromx, fromy, tox, toy] = [0, 0, 0, 1];
+                        else if (a === 3) [fromx, fromy, tox, toy] = [1, 0, 1, 1];
+                        else if (a === 4) [fromx, fromy, tox, toy] = [0, 1, 1, 1];
+                        else if (a === 5) [fromx, fromy, tox, toy] = [0, 0, 1, 1];
+                        else if (a === 6) [fromx, fromy, tox, toy] = [0, 1, 1, 0];
+                        else throw new Error();
+                        context.moveTo(x + (fromx + x1) * HALF_SYMBOL_SIZE, y + (fromy + y1) * HALF_SYMBOL_SIZE);
+                        context.lineTo(x + (tox + x1) * HALF_SYMBOL_SIZE, y + (toy + y1) * HALF_SYMBOL_SIZE);
+                    }
+                }
+            };
+            let itx = Math.floor(Math.random() * charsWidth);
+            let ity = Math.floor(Math.random() * charsHeight);
+            let dir = Math.floor(Math.random() * 4);
+            let itlimit = Math.floor(Math.random() * 6) + 5;
+            const dx = [1, 0, -1, 0];
+            const dy = [0, -1, 0, 1];
+            const changeOneChar = () => {
+                // const xx = Math.floor(Math.random() * charsWidth);
+                // const yy = Math.floor(Math.random() * charsHeight);
+                const xx = itx;
+                const yy = ity;
+                itlimit -= 1;
+                itx += dx[dir];
+                ity += dy[dir];
+                if (itlimit <= 0 || itx < 0 || itx >= charsWidth || ity < 0 || ity >= charsHeight) {
+                    itx = Math.floor(Math.random() * charsWidth);
+                    ity = Math.floor(Math.random() * charsHeight);
+                    dir = Math.floor(Math.random() * 4);
+                    itlimit = Math.floor(Math.random() * 6) + 5;
+                }
+                const x = xOffset + SYMBOLS_INTERVAL + xx * charsDiff;
+                const y = yOffset + SYMBOLS_INTERVAL + yy * charsDiff;
+                context.clearRect(x - SYMBOLS_INTERVAL / 2, y - SYMBOLS_INTERVAL / 2, charsDiff, charsDiff);
+                context.beginPath();
+                genAndRenderChar(xx, yy);
+                context.stroke();
+                context.closePath();
+            };
+            context.beginPath();
+            for (let xx = 0; xx < charsWidth; xx++) for (let yy = 0; yy < charsHeight; yy++) genAndRenderChar(xx, yy);
+            context.stroke();
+            context.closePath();
+            setInterval(() => changeOneChar(), 50);
+        });
+    </script>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+
+</html>
