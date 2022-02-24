@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Binary Memory — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <script src="js/ruleseed.js"></script>
+    <script>
+        function generatePriorityString(rnd) {
+            const res = [1, 2, 3, 4];
+            for (let i = 0; i < res.length; i++) {
+                const j = rnd.nextMax(res.length);
+                [res[i], res[j]] = [res[j], res[i]];
+            }
+            return res.join("");
+        }
+
+        function setDefaultRules(rnd) { setRules(rnd); }
+
+        function setRules(rnd) {
+            const table = document.getElementById("priority-table");
+            const firstRow = table.children[1];
+            for (let i = firstRow.children.length; i < 10; i++) {
+                const td = firstRow.appendChild(document.createElement("td"));
+                td.innerText = (i + 1) % 10;
+            }
+            for (let i = 0; i < 5; i++) {
+                const tr = table.children[i + 2];
+                for (let j = 0; j < 10; j++) {
+                    const td = tr.children[j + 1] ?? tr.appendChild(document.createElement("td"));
+                    td.innerText = generatePriorityString(rnd);
+                }
+            }
+        }
+    </script>
+    <style>
+        table {
+            margin: auto;
+            text-align: center;
+        }
+
+        table tr:not(:first-child):not(:nth-child(2)) {
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-03">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title card-name">Binary Memory</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Module Name.svg" class="diagram">
+                <h2>On the Subject of Binary Memory</h2>
+                <p class="flavour-text">While solving this module, it is recommended to protect yourself from cosmic rays that can flip bits in your memory.</p>
+                <p>
+                    The module has a screen and four buttons.
+                    Each button is numbered from 1 to 4 in reading order.
+                    The screen displays 1:X, where X is 1 or 0.
+                </p>
+                <p>
+                    The number on the screen before the colon symbol is the number of the current stage.
+                    Each time another
+                    <a href="https://ktane.timwi.de/More/Ignore%20Table.html" target="_blank" rel="noopener noreferrer">non-ignored</a>
+                    module is solved, the stage number will be incremented by one,
+                    and the bit written after the colon character may change from 1 to 0 or vice versa.
+                    Memorize all displayed bits.
+                </p>
+                <p>
+                    If the bit of four stages in a row will match, then you need to switch to the submit mode. Press any button to do this.
+                    This must be done before another non-ignored module is solved. Otherwise, you will get a strike every time you solve another module.
+                </p>
+                <p>
+                    If all non-ignored modules are solved, then a green dot will be displayed in the upper right corner of the screen.
+                    Its presence means that the module can be switched to the submit mode. Press any button to do so.
+                </p>
+                <p>Pressing the button when the module is not ready to go to the submit mode will result in a strike.</p>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 2</div>
+        </div>
+        <div class="page page-bg-05">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title card-name">Binary Memory</span>
+            </div>
+            <div class="page-content">
+                <h3>Submit mode</h3>
+                <p>
+                    Using the table below, prioritize the buttons for each stage. To solve the module, press the valid button with the highest priority for each stage.
+                    If the button has not been pressed before, then it is valid. Otherwise, the button is valid if the last press was for the stage with the opposite bit.
+                    The current stage will be displayed at the top of the screen.
+                </p>
+                <p>
+                    If the wrong button was pressed, all buttons will change color. A gray button means that it has not been pressed.
+                    A colored button means that the last press was made for a stage with a bit equal to 1 if the button is green and 0 if the button is red.
+                    Also, a colored dot will appear in the upper left corner of the screen, which displays the bit of the current stage: green - 1, red - 0.
+                </p>
+                <p>
+                    To prioritize buttons, first find the top row with a valid condition. The columns of the table are the last digits of the stage numbers.
+                    The first digit is the button number with the highest priority.
+                </p>
+                <table>
+                    <tbody id="priority-table">
+                        <tr>
+                            <td rowspan="2">Condition</td>
+                            <td colspan="10">Last digit of stage number</td>
+                        </tr>
+                        <tr></tr>
+                        <tr>
+                            <td>port plates > 2</td>
+                        </tr>
+                        <tr>
+                            <td>serial letters = 3</td>
+                        </tr>
+                        <tr>
+                            <td>battery holders = 1</td>
+                        </tr>
+                        <tr>
+                            <td>at least 29 modules</td>
+                        </tr>
+                        <tr>
+                            <td>otherwise</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="page-footer relative-footer">Page 2 of 2</div>
+        </div>
+    </div>
+</body>
+
+</html>
