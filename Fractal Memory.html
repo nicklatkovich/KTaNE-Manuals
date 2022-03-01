@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Fractal Memory — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <style>
+        .flavour-text {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .a1 {
+            font-size: 90%;
+        }
+
+        .a2 {
+            font-size: 80%;
+        }
+
+        .a3 {
+            font-size: 70%;
+        }
+
+        .a4 {
+            font-size: 60%;
+        }
+
+        .a5 {
+            font-size: 50%;
+        }
+
+        .a6 {
+            font-size: 40%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-03">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title card-name">Fractal Memory</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Module Name.svg" class="diagram">
+                <h2>On the Subject of Fractal Memory</h2>
+                <p class="flavour-text">
+                    <span>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span>
+                    <span class="a1">BBBBBBBBBBBBBBBB</span>
+                    <span class="a2">CCCCCCCC</span>
+                    <span class="a3">DDDD</span>
+                    <span class="a4">EE</span>
+                    <span class="a5">F</span>
+                    <span class="a6">.</span>
+                </p>
+                <p>
+                    The module is an 8x8 grid. Some cells will be colored red, green, blue, cyan, purple or yellow.
+                    Also, the borders of the cells of this grid can also be painted in one of the above colors, as well as in white or black.
+                    Each time any non-ignored module is solved, colored cells or cell borders may change.
+                </p>
+                <table style="float:right">
+                    <tr>
+                        <td>Color</td>
+                        <td>Stage is valid if ...</td>
+                    </tr>
+                    <tr>
+                        <td>Yellow</td>
+                        <td>odd starting time in minutes</td>
+                    </tr>
+                    <tr>
+                        <td>Cyan</td>
+                        <td>exactly one battery holder</td>
+                    </tr>
+                    <tr>
+                        <td>Green</td>
+                        <td>even number of indicators</td>
+                    </tr>
+                    <tr>
+                        <td>Magenta</td>
+                        <td>4th serial character > 4</td>
+                    </tr>
+                    <tr>
+                        <td>Blue</td>
+                        <td>at least one PS/2 port</td>
+                    </tr>
+                    <tr>
+                        <td>Red</td>
+                        <td>less than 29 modules</td>
+                    </tr>
+                </table>
+                <p>
+                    Refer to the table on the right. Using the color of the cell borders, determine the validity of the current stage.
+                    If stage is invalid then ignore the current stage.
+                </p>
+                <p>Stage with white cell borders is always valid.</p>
+                <p>Stage with black cell borders is always invalid.</p>
+                <p>
+                    When all non-ignored modules have been solved, the entire grid will turn black and the module will be switched to submit mode.
+                    If there are no non-ignored modules on the bomb, then all cells will be initially colored: press any cell to switch to submit mode.
+                    The previously obtained information should be enough to determine the color of each grid cell. By pressing the cells you can change their colors.
+                    When eight different cells are given colors, pressing a black cell will be considered as a submit.
+                    The module will be solved if the resulting grid is the fractal described on the next page. Otherwise, you will get a strike and go into recovery mode.
+                </p>
+                <p>
+                    When a strike is received, all cells will turn black, and the borders of the cells will turn red. Press up to eight cells to get their color.
+                    Pressing the ninth cell will exit recovery mode and go back to submit mode.
+                </p>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 1</div>
+        </div>
+    </div>
+</body>
+
+</html>
