@@ -11,17 +11,36 @@
     <script src="js/ktane-utils.js"></script>
     <script src='js/ruleseed.js'></script>
     <script>
+        const HYPERCUBES_COUNT = 10;
+        const SYMBOLS_COUNT = HYPERCUBES_COUNT * 8 + 8 * 5;
+        const COMMON_SYMBOLS_COUNT = 40;
+
         const AXIS = ["X", "-X", "Y", "-Y", "Z", "-Z", "W", "-W"];
-        const SYMBOLS_WIDTH = 10;
-        const SYMBOLS_HEIGHT = 12;
-        const SYMBOLS_COUNT = SYMBOLS_WIDTH * SYMBOLS_HEIGHT;
+        const SYMBOLS_GROUP_SIZE = 12;
         const SYMBOLS = new Array(SYMBOLS_COUNT).fill(0).map((_, i) => i);
 
-        function randInt(from, to) {
+        /** @type {{ [s: string]: [number, number] }} */
+        const AXLES_TO_INDICES = [
+            ["-W", ["-Z", "Z", "X", "-X", "Y", "-Y"]],
+            ["-X", ["-Z", "Z", "-W", "W", "Y", "-Y"]],
+            ["X", ["-Z", "Z", "W", "-W", "Y", "-Y"]],
+            ["-Y", ["-Z", "Z", "X", "-X", "-W", "W"]],
+            ["Y", ["-Z", "Z", "X", "-X", "W", "-W"]],
+            ["-Z", ["W", "-W", "X", "-X", "Y", "-Y"]],
+            ["Z", ["-W", "W", "X", "-X", "Y", "-Y"]],
+            ["W", ["-Z", "Z", "-X", "X", "Y", "-Y"]],
+        ].reduce((acc, [axis, axles], i) => {
+            for (let j = 0; j < 6; j++) acc[axis + axles[j]] = [i, j];
+            return acc;
+        }, {});
+
+        function randInt(from, to, rnd) {
+            if (rnd) return rnd.next(from, to);
             return Math.floor(Math.random() * (to -from)) + from;
         }
 
-        function shuffled(arr) {
+        function shuffled(arr, rnd) {
+            if (rnd) return rnd.shuffleArray(arr);
             const res = [...arr];
             for (let i = 0; i < arr.length; i++) {
                 const j = randInt(0, arr.length);
@@ -52,45 +71,48 @@
         }
 
         function setRules(rnd) {
-            const symbols = rnd.shuffleArray(SYMBOLS);
-            const commonSymbols = symbols.slice(0, 40);
-            runGenerator(rnd, commonSymbols);
+            runGenerator(rnd, rnd.shuffleArray(SYMBOLS).slice(0, 40));
         }
 
         function runGenerator(rnd, commonSymbols) {
-            const rareSymbols = SYMBOLS.filter((s) => commonSymbols.indexOf(s) === -1);
-            for (let i = 0; i < 10; i++) {
-                let hypercubeRareSymbols = [];
-                const commonSymbolsSet = [...commonSymbols];
-                const hypercube = {};
-                for (let i = 0; i < AXIS.length; i++) {
-                    const hyperface = AXIS[i];
-                    const faces = AXIS.filter((ax) => !areOnSameAxis(ax, hyperface));
-                    const rareFaceIndex = rnd.next(0, faces.length);
-                    const rareFace = rareSymbols.pop();
-                    hypercubeRareSymbols.push(rareFace);
-                    for (let j = 0; j < faces.length; j++) {
-                        const face = faces[j];
-                        hypercube[hyperface + face] = j === rareFaceIndex ? rareFace : commonSymbolsSet.pop();
-                    }
+            const commonSymbolsSet = new Set(commonSymbols);
+            const rareSymbols = rnd.shuffleArray(SYMBOLS.filter((s) => !commonSymbolsSet.has(s)));
+            console.log(rareSymbols.join(", "));
+            const symbols = [];
+            for (let hypercubeIndex = 0; hypercubeIndex < HYPERCUBES_COUNT; hypercubeIndex++) {
+                symbols.push([]);
+                const commons = rnd.shuffleArray(commonSymbols);
+                console.log(`HC: ${hypercubeIndex}`);
+                for (let hyperfaceIndex = 0; hyperfaceIndex < 8; hyperfaceIndex++) {
+                    symbols[hypercubeIndex].push([]);
+                    const hyperfaceCommons = commons.slice(hyperfaceIndex * 5, hyperfaceIndex * 5 + 5);
+                    const uncommon = rareSymbols[hypercubeIndex * 8 + hyperfaceIndex];
+                    symbols[hypercubeIndex][hyperfaceIndex] = rnd.shuffleArray([...hyperfaceCommons, uncommon]);
+                    console.log(symbols[hypercubeIndex][hyperfaceIndex].join(", "));
+                    // placeholder:
+                    // symbols[hypercubeIndex][hyperfaceIndex] = new Array(6).fill(0).map((_, i) => hyperfaceIndex * 6 + i);
                 }
-                const hyperfaces = shuffled(AXIS);
+            }
+            // const buildingRnd = null;
+            const buildingRnd = rnd;
+            for (let hypercubeIndex = 0; hypercubeIndex < 10; hypercubeIndex++) {
+                const hyperfaces = shuffled(AXIS, buildingRnd);
                 const usedHyperfaces = [hyperfaces.pop()];
                 if (areOnSameAxis(hyperfaces[0], usedHyperfaces[0])) {
-                    const rndInd = randInt(1, hyperfaces.length);
+                    const rndInd = randInt(1, hyperfaces.length, buildingRnd);
                     [hyperfaces[0], hyperfaces[rndInd]] = [hyperfaces[rndInd], hyperfaces[0]];
                 }
-                const div = document.getElementById(`hypernet-${i}`);
+                const div = document.getElementById(`hypernet-${hypercubeIndex}`);
                 div.innerHTML = "";
                 for (let i = 0; i < 7; i++) {
                     let hyperface = hyperfaces[i];
                     const possibleHyperfaces = usedHyperfaces.filter((ax) => !areOnSameAxis(ax, hyperface));
-                    let otherHyperface = possibleHyperfaces[randInt(0, possibleHyperfaces.length)];
+                    let otherHyperface = possibleHyperfaces[randInt(0, possibleHyperfaces.length, buildingRnd)];
                     let freeAxis = AXIS.filter((ax) => !areOnSameAxis(ax, hyperface) && !areOnSameAxis(ax, otherHyperface));
                     usedHyperfaces.push(hyperface);
-                    if (randInt(0, 2) === 0) [hyperface, otherHyperface] = [otherHyperface, hyperface];
-                    const topAxis = freeAxis[randInt(0, freeAxis.length)];
-                    const rightAxis = freeAxis.filter((ax) => !areOnSameAxis(ax, topAxis))[randInt(0, 2)];
+                    if (randInt(0, 2, buildingRnd) === 0) [hyperface, otherHyperface] = [otherHyperface, hyperface];
+                    const topAxis = freeAxis[randInt(0, freeAxis.length, buildingRnd)];
+                    const rightAxis = freeAxis.filter((ax) => !areOnSameAxis(ax, topAxis))[randInt(0, 2, buildingRnd)];
                     const patterns = [
                         hyperface + negativeAxis(otherHyperface),
                         hyperface + rightAxis,
@@ -107,23 +129,26 @@
                             const faceDiv = connection.appendChild(document.createElement("div"));
                             faceDiv.classList.add("icon", cube, facePos);
                             const face = patterns[patternIndex++];
-                            const symbolId = hypercube[face];
-                            const xx = symbolId % SYMBOLS_WIDTH;
-                            const yy = Math.floor(symbolId / SYMBOLS_WIDTH) + 1;
-                            faceDiv.style.backgroundPosition = `${-xx * 40}px ${yy * 40}px`;
+                            const [j, k] = AXLES_TO_INDICES[face];
+                            const symbolId = symbols[hypercubeIndex][j][k];
+                            if (hypercubeIndex === 2) console.log(face, symbolId);
+                            const yy = -symbolId % SYMBOLS_GROUP_SIZE;
+                            const xx = -Math.floor(symbolId / SYMBOLS_GROUP_SIZE);
+                            faceDiv.style.backgroundPosition = `${xx * 40}px ${yy * 40}px`;
                         }
                     }
                 }
-                const rareContainer = document.getElementById(`rare-symbols-${i}`);
+                const rareContainer = document.getElementById(`rare-symbols-${hypercubeIndex}`);
                 rareContainer.innerHTML = "";
-                hypercubeRareSymbols = shuffled(hypercubeRareSymbols);
+                const hypercubeRareSymbols = shuffled(rareSymbols.slice(hypercubeIndex * 8, hypercubeIndex * 8 + 8), buildingRnd);
+                console.log(hypercubeRareSymbols.join(", "));
                 for (let i = 0; i < 8; i++) {
                     const span = rareContainer.appendChild(document.createElement("span"));
                     span.classList.add("icon");
                     const symbolId = hypercubeRareSymbols[i];
-                    const xx = symbolId % SYMBOLS_WIDTH;
-                    const yy = Math.floor(symbolId / SYMBOLS_WIDTH) + 1;
-                    span.style.backgroundPosition = `${-xx * 40}px ${yy * 40}px`;
+                    const yy = -symbolId % SYMBOLS_GROUP_SIZE;
+                    const xx = -Math.floor(symbolId / SYMBOLS_GROUP_SIZE);
+                    span.style.backgroundPosition = `${xx * 40}px ${yy * 40}px`;
                     span.style.left = `${i * 40}px`;
                 }
             }
