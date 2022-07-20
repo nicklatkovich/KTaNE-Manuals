@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Maze of Fifths — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/main.css" />
+    <script src="js/ktane-utils.js"></script>
+    <style>
+        table img {
+            width: 192px;
+            height: 192px;
+        }
+
+        table,
+        .dark table {
+            width: 100%;
+            border: none;
+            text-align: center;
+        }
+
+        td,
+        .dark td {
+            border: none;
+            padding-bottom: 64px;
+        }
+
+        .dark table img,
+        .dark .maze-0 img {
+            filter: invert(1);
+        }
+
+        .maze-0 {
+            float: right;
+            margin-right: -32px;
+            margin-top: 32px;
+        }
+
+        .maze-0 img {
+            width: 384px;
+            height: 384px;
+            margin-bottom: -32px;
+        }
+
+        .maze-0 h3 {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section">
+        <div class="page page-bg-03">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title card-name">Maze of Fifths</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Maze of Fifths.svg" class="diagram">
+                <h2>On the Subject of Maze of Fifths</h2>
+                <p class="flavour-text">Huge brain move: write a pop song while playing KTaNE.</p>
+                <p>Calculate the Manhattan distance* between the green and red cells of the maze. Add AA batteries. The last digit of the result is the number of the maze.</p>
+                <p>Build a path from green to white cell:</p>
+                <ul>
+                    <li>To start, press the green cell;</li>
+                    <li>You can only move one cell orthogonally or diagonally per step;</li>
+                    <li>If there is a bold border between orthogonal cells on the maze map, then this movement is prohibited;</li>
+                    <li>If there is a circle between the diagonal cells on the maze map, then this movement is prohibited;</li>
+                    <li>You can not visit the same cell twice;</li>
+                    <li>You can not visit the red cell;</li>
+                    <li>It is necessary to make <b>exactly</b> as many steps as the number of digits in the serial number multiplied by two (pressing the green cell at the start does not count as a step).</li>
+                </ul>
+                <div class="maze-0">
+                    <img src="img/Maze of Fifths/maze_0.svg">
+                    <h3>Maze #0</h3>
+                </div>
+                <p>Designations of cell colors:</p>
+                <ul>
+                    <li>Green/Cyan: Start</li>
+                    <li>Red: Forbidden</li>
+                    <li>Blue/Cyan: Current position</li>
+                    <li>White: Finish</li>
+                    <li>Grey: Visited cell</li>
+                </ul>
+                <p>The maze can be rotated and/or mirrored. Use Maze #0 and the letters on the module to find these transformations.</p>
+                <p style="margin-top: 128px;">* The Manhattan distance is the smallest number of orthogonal steps needed to move between the two cells.</p>
+            </div>
+            <div class="page-footer relative-footer">Page 1 of 2</div>
+        </div>
+        <div class="page page-bg-03">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title card-name">Maze of Fifths</span>
+            </div>
+            <div class="page-content">
+                <table>
+                    <tr>
+                        <td><img src="img/Maze of Fifths/maze_1.svg"><br>Maze #1</td>
+                        <td><img src="img/Maze of Fifths/maze_2.svg"><br>Maze #2</td>
+                        <td><img src="img/Maze of Fifths/maze_3.svg"><br>Maze #3</td>
+                    </tr>
+                    <tr>
+                        <td><img src="img/Maze of Fifths/maze_4.svg"><br>Maze #4</td>
+                        <td><img src="img/Maze of Fifths/maze_5.svg"><br>Maze #5</td>
+                        <td><img src="img/Maze of Fifths/maze_6.svg"><br>Maze #6</td>
+                    </tr>
+                    <tr>
+                        <td><img src="img/Maze of Fifths/maze_7.svg"><br>Maze #7</td>
+                        <td><img src="img/Maze of Fifths/maze_8.svg"><br>Maze #8</td>
+                        <td><img src="img/Maze of Fifths/maze_9.svg"><br>Maze #9</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="page-footer relative-footer">Page 2 of 2</div>
+        </div>
+    </div>
+</body>
+
+</html>
